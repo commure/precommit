@@ -1,0 +1,8 @@
+[package]
+name = "precommit"
+version = "0.1.0"
+authors = ["rparki <chesslunatic@gmail.com>"]
+
+[dependencies]
+yaml-rust = "0.4"
+clap = { version = "~2.29.0", features = ["yaml"]}

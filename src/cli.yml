@@ -1,0 +1,12 @@
+name: precommit
+version: "0.0.1"
+author: Ralph P. <chesslunatic@gmail.com>
+about: Precommit hooks.
+subcommands:
+    - compile:
+        about: compiles precommits and alters .git/hooks
+        version: "0.1.0"
+        args:
+            - debug:
+                short: d
+                help: print debug information
