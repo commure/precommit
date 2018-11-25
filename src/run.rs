@@ -1,5 +1,5 @@
 use clap::ArgMatches;
-use git2::{Repository, StatusOptions, StatusShow, Statuses};
+use git2::{Repository, StatusEntry, StatusOptions, StatusShow, Statuses};
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
@@ -43,27 +43,51 @@ fn yaml_to_string(yaml: &Yaml) -> Option<String> {
   }
 }
 
+fn yaml_to_array<'a>(yaml: &'a Yaml) -> Option<&'a Vec<Yaml>> {
+  match yaml {
+    Yaml::Array(array) => Some(array),
+    _ => None,
+  }
+}
+
+fn yaml_to_bool(yaml: &Yaml) -> bool {
+  match yaml {
+    Yaml::Boolean(boolean) => *boolean,
+    _ => false,
+  }
+}
+
+fn create_command(hook: &Yaml, entry: &StatusEntry) -> Command {
+  let command_str = yaml_to_string(&hook["command"]).unwrap();
+  let mut command = Command::new(command_str);
+  let default = vec![];
+  let args = yaml_to_array(&hook["arguments"]).unwrap_or(&default);
+  for arg in args {
+    let arg_string = yaml_to_string(arg).unwrap();
+    if arg_string == "<filename>".to_string() {
+      command.arg(entry.path().unwrap());
+    } else {
+      command.arg(arg_string);
+    }
+  }
+
+  command
+}
+
 pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let hook_type = matches.values_of("hook_type").unwrap().next().unwrap();
   let hook_config = load_hooks(matches);
 
   let repo = Repository::init("./").expect("failed to find git repo");
   let statuses = get_staged_files(&repo);
-
-  let emp_vec = std::vec::Vec::new();
-  let hooks = match &hook_config[0][hook_type] {
-    Yaml::Array(array) => array,
-    _ => &emp_vec,
-  };
+  let hooks = yaml_to_array(&hook_config[0][hook_type]).unwrap();
 
   for hook in hooks {
     let language_hash = build_language_hash(&hook).unwrap();
     for entry in statuses.iter() {
       let chunks = entry.path().unwrap().split('.').collect::<Vec<&str>>();
       if let Some(_v) = language_hash.get(&Yaml::String(chunks[chunks.len() - 1].to_string())) {
-        let command = yaml_to_string(&hook["command"]).unwrap();
-        let output = Command::new(command)
-          .arg(entry.path().unwrap())
+        let output = create_command(&hook, &entry)
           .output()
           .expect("failed to execute process");
         io::stdout()

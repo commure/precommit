@@ -1,7 +1,13 @@
 precommit:
     - command: eslint
+      arguments:
+        - <filename>
       languages: [js, sass, css]
     - command: rustfmt
+      arguments:
+        - <filename>
       languages: [rs]
     - command: cat
+      arguments:
+        - <filename>
       languages: [yaml, yml]
