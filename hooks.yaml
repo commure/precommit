@@ -1,0 +1,7 @@
+precommit:
+    - command: eslint
+      languages: [js, sass, css]
+    - command: rustfmt
+      languages: [rs]
+    - command: cat
+      languages: [yaml, yml]

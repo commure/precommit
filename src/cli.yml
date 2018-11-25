@@ -6,7 +6,13 @@ subcommands:
     - compile:
         about: compiles precommits and alters .git/hooks
         version: "0.1.0"
+    - run:
+        about: compiles precommits and alters .git/hooks
+        version: "0.1.0"
         args:
-            - debug:
-                short: d
-                help: print debug information
+            - hook_type:
+                required: true
+                index: 1
+            - hooks:
+                required: true
+                index: 2
