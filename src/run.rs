@@ -48,7 +48,6 @@ fn load_hooks(matches: &ArgMatches) -> Hooks {
 
 fn get_staged_files<'a>(repo: &'a Repository) -> Statuses<'a> {
   let mut status_options = StatusOptions::new();
-  status_options.show(StatusShow::Index);
   status_options.include_ignored(false);
   status_options.include_unmodified(false);
 
