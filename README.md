@@ -5,7 +5,7 @@ Run `cargo run compile <hooks_file>` example hooks_file would be hooks.yaml
 This will setup the git hook which is currently only a pre-commit. 
 
 ## Information
-Currenlty this runs against only staged files. And only works for precommit hook.
+Currenlty this only runs git pre-commit hook.
 
 ## Config file
 ```yaml
