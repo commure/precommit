@@ -1,7 +1,6 @@
 use clap::ArgMatches;
 use git2::{Repository, StatusEntry, StatusOptions, StatusShow, Statuses};
 use regex::Regex;
-use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, Write};
