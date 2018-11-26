@@ -14,6 +14,8 @@ struct HookCommand {
   arguments: Vec<String>,
   regex: String,
   #[serde(default)]
+  restage: bool,
+  #[serde(default)]
   description: Option<String>,
 }
 
@@ -74,6 +76,7 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let hook_config = load_hooks(matches);
 
   let repo = Repository::init("./").expect("failed to find git repo");
+  let repo_index = repo.index().expect("failed to get repo index");
   let statuses = get_staged_files(&repo);
   let mut err = false;
 
