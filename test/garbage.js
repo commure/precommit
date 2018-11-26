@@ -1,3 +1,1 @@
-const ASDF = "ASDF";
-
-console.log(ASDF);
+export const ASDF = "ASDF";

@@ -7,7 +7,7 @@ pub fn script_gen(location_command: &str, hook: &str, hook_config_file: &str) ->
   format!(
     "
 #!/bin/sh
-$ {}
+# {}
 # Hook created by precommit
 {} run {} {}
 ",

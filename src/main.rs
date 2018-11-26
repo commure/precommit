@@ -23,7 +23,7 @@ fn run() -> Result<(), ()> {
 
 fn main() {
   if let Err(()) = run() {
-    println!("Exit during compilation");
+    println!("pre-commit failed");
     std::process::exit(1);
   }
 }

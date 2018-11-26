@@ -76,6 +76,7 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
 
   let repo = Repository::init("./").expect("failed to find git repo");
   let statuses = get_staged_files(&repo);
+  let mut err = false;
 
   if let Some(hook_commands) = hook_config.get(hook_type) {
     for command in hook_commands {
@@ -86,16 +87,25 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
           let output = create_command(&command, &entry)
             .output()
             .expect("failed to execute process");
+
           io::stdout()
             .write(&output.stdout)
             .expect("failed to write to stdout");
           io::stderr()
             .write(&output.stderr)
             .expect("failed to write to stderr");
+
+          if !output.status.success() {
+            err = true;
+          }
         }
       }
     }
   }
 
-  Ok(())
+  if err {
+    Err(())
+  } else {
+    Ok(())
+  }
 }
