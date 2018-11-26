@@ -7,6 +7,10 @@ pre-commit:
       arguments:
         - <filename>
       regex: '.*(rs)$'
+    - command: cargo
+      arguments:
+        - clippy
+      regex: '.*(rs)$'
     - command: prettier
       arguments:
         - --write

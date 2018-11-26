@@ -1,5 +1,5 @@
 use clap::ArgMatches;
-use git2::{Repository, StatusEntry, StatusOptions, StatusShow, Statuses};
+use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 use regex::Regex;
 
 use std::fs::File;
@@ -46,7 +46,7 @@ fn load_hooks(matches: &ArgMatches) -> Hooks {
   serde_yaml::from_str(&hooks_file).unwrap()
 }
 
-fn get_staged_files<'a>(repo: &'a Repository) -> Statuses<'a> {
+fn get_staged_files(repo: &Repository) -> Statuses {
   let mut status_options = StatusOptions::new();
   status_options.include_ignored(false);
   status_options.include_unmodified(false);
@@ -88,10 +88,10 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
             .expect("failed to execute process");
 
           io::stdout()
-            .write(&output.stdout)
+            .write_all(&output.stdout)
             .expect("failed to write to stdout");
           io::stderr()
-            .write(&output.stderr)
+            .write_all(&output.stderr)
             .expect("failed to write to stderr");
 
           if !output.status.success() {
