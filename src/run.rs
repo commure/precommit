@@ -1,10 +1,10 @@
 use clap::ArgMatches;
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 use regex::Regex;
-
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, Write};
+use std::path::Path;
 use std::process::Command;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -76,7 +76,7 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let hook_config = load_hooks(matches);
 
   let repo = Repository::init("./").expect("failed to find git repo");
-  let repo_index = repo.index().expect("failed to get repo index");
+  let mut repo_index = repo.index().expect("failed to get repo index");
   let statuses = get_staged_files(&repo);
   let mut err = false;
 
@@ -85,7 +85,8 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
       let regex = Regex::new(&command.regex).unwrap();
 
       for entry in statuses.iter() {
-        if regex.is_match(entry.path().unwrap()) {
+        let file_path = entry.path().unwrap();
+        if regex.is_match(file_path) {
           let output = create_command(&command, &entry)
             .output()
             .expect("failed to execute process");
@@ -99,6 +100,12 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
 
           if !output.status.success() {
             err = true;
+          }
+
+          if command.restage {
+            repo_index
+              .add_path(Path::new(file_path))
+              .unwrap_or_else(|_| panic!("failed to restage file {}", file_path));
           }
         }
       }
