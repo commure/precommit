@@ -2,12 +2,17 @@ precommit:
     - command: eslint
       arguments:
         - <filename>
-      languages: [js, sass, css]
+      regex: '.*(js|sass|css)$'
     - command: rustfmt
       arguments:
         - <filename>
-      languages: [rs]
+      regex: '.*(rs)$'
+    - command: prettier
+      arguments:
+        - --write
+        - <filename>
+      regex: '.*(js|jsx|scss|md)$'
     - command: cat
       arguments:
         - <filename>
-      languages: [yaml, yml]
+      regex: '.*(yaml|yml)$'

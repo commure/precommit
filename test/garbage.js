@@ -1,5 +1,3 @@
+const ASDF = "ASDF";
 
-
-console.log(OMG)
-
-
+console.log(ASDF);

@@ -6,4 +6,5 @@ authors = ["rparki <chesslunatic@gmail.com>"]
 [dependencies]
 clap = { version = "~2.29.0", features = ["yaml"]}
 git2 = "0.7"
+regex = "1"
 yaml-rust = "0.4"

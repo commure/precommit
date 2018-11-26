@@ -1,4 +1,5 @@
 extern crate git2;
+extern crate regex;
 extern crate yaml_rust;
 #[macro_use]
 extern crate clap;

@@ -1,5 +1,6 @@
 use clap::ArgMatches;
 use git2::{Repository, StatusEntry, StatusOptions, StatusShow, Statuses};
+use regex::Regex;
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
@@ -27,13 +28,6 @@ fn get_staged_files<'a>(repo: &'a Repository) -> Statuses<'a> {
   repo
     .statuses(Some(&mut status_options))
     .expect("error getting statuses")
-}
-
-fn build_language_hash<'a>(hook: &'a Yaml) -> Option<HashSet<&'a Yaml>> {
-  match &hook["languages"] {
-    Yaml::Array(array) => Some(array.iter().collect()),
-    _ => None,
-  }
 }
 
 fn yaml_to_string(yaml: &Yaml) -> Option<String> {
@@ -83,10 +77,10 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let hooks = yaml_to_array(&hook_config[0][hook_type]).unwrap();
 
   for hook in hooks {
-    let language_hash = build_language_hash(&hook).unwrap();
+    let regex = Regex::new(&yaml_to_string(&hook["regex"]).unwrap()).unwrap();
+
     for entry in statuses.iter() {
-      let chunks = entry.path().unwrap().split('.').collect::<Vec<&str>>();
-      if let Some(_v) = language_hash.get(&Yaml::String(chunks[chunks.len() - 1].to_string())) {
+      if regex.is_match(entry.path().unwrap()) {
         let output = create_command(&hook, &entry)
           .output()
           .expect("failed to execute process");
