@@ -13,6 +13,7 @@ Currenlty this only runs git pre-commit hook.
     - command: <command to run>
       arguments: <command_arguments note special variable of filename which will fill in file that will be run>
       regex: <regex to test whether or not to run a given file>
+      restage: <optional boolean saying whether to restage file in git after processing command>
 ```
 
 ## Example
