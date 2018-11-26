@@ -7,6 +7,10 @@ pre-commit:
       arguments:
         - <filename>
       regex: '.*(rs)$'
+    - command: cat
+      arguments:
+        - <filename>
+      regex: '.*(rs)$'
     - command: prettier
       arguments:
         - --write

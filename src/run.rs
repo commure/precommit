@@ -1,13 +1,41 @@
 use clap::ArgMatches;
 use git2::{Repository, StatusEntry, StatusOptions, StatusShow, Statuses};
 use regex::Regex;
+
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, Write};
 use std::process::Command;
-use yaml_rust::{Yaml, YamlLoader};
 
-fn load_hooks(matches: &ArgMatches) -> std::vec::Vec<Yaml> {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct HookCommand {
+  command: String,
+  #[serde(default)]
+  arguments: Vec<String>,
+  regex: String,
+  #[serde(default)]
+  description: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Hooks {
+  #[serde(rename = "pre-commit")]
+  pre_commit: Option<Vec<HookCommand>>,
+}
+
+impl Hooks {
+  fn get(&self, hook_type: &str) -> Option<Vec<HookCommand>> {
+    match hook_type {
+      "pre-commit" => self.pre_commit.clone(),
+      _ => {
+        println!("Unimplemented hook type of {}", hook_type);
+        None
+      }
+    }
+  }
+}
+
+fn load_hooks(matches: &ArgMatches) -> Hooks {
   let hooks_file_path = matches.values_of("hooks").unwrap().next().unwrap();
   let mut hooks_file = String::new();
   File::open(hooks_file_path)
@@ -15,7 +43,7 @@ fn load_hooks(matches: &ArgMatches) -> std::vec::Vec<Yaml> {
     .read_to_string(&mut hooks_file)
     .expect("could not create string");
 
-  YamlLoader::load_from_str(&hooks_file).expect("failed to read hooks")
+  serde_yaml::from_str(&hooks_file).unwrap()
 }
 
 fn get_staged_files<'a>(repo: &'a Repository) -> Statuses<'a> {
@@ -29,38 +57,13 @@ fn get_staged_files<'a>(repo: &'a Repository) -> Statuses<'a> {
     .expect("error getting statuses")
 }
 
-fn yaml_to_string(yaml: &Yaml) -> Option<String> {
-  match yaml {
-    Yaml::String(string) => Some(string.clone()),
-    _ => None,
-  }
-}
-
-fn yaml_to_array<'a>(yaml: &'a Yaml) -> Option<&'a Vec<Yaml>> {
-  match yaml {
-    Yaml::Array(array) => Some(array),
-    _ => None,
-  }
-}
-
-fn yaml_to_bool(yaml: &Yaml) -> bool {
-  match yaml {
-    Yaml::Boolean(boolean) => *boolean,
-    _ => false,
-  }
-}
-
-fn create_command(hook: &Yaml, entry: &StatusEntry) -> Command {
-  let command_str = yaml_to_string(&hook["command"]).unwrap();
-  let mut command = Command::new(command_str);
-  let default = vec![];
-  let args = yaml_to_array(&hook["arguments"]).unwrap_or(&default);
-  for arg in args {
-    let arg_string = yaml_to_string(arg).unwrap();
-    if arg_string == "<filename>".to_string() {
+fn create_command(h_command: &HookCommand, entry: &StatusEntry) -> Command {
+  let mut command = Command::new(&h_command.command);
+  for arg in &h_command.arguments {
+    if arg == "<filename>" {
       command.arg(entry.path().unwrap());
     } else {
-      command.arg(arg_string);
+      command.arg(arg);
     }
   }
 
@@ -73,22 +76,23 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
 
   let repo = Repository::init("./").expect("failed to find git repo");
   let statuses = get_staged_files(&repo);
-  let hooks = yaml_to_array(&hook_config[0][hook_type]).unwrap();
 
-  for hook in hooks {
-    let regex = Regex::new(&yaml_to_string(&hook["regex"]).unwrap()).unwrap();
+  if let Some(hook_commands) = hook_config.get(hook_type) {
+    for command in hook_commands {
+      let regex = Regex::new(&command.regex).unwrap();
 
-    for entry in statuses.iter() {
-      if regex.is_match(entry.path().unwrap()) {
-        let output = create_command(&hook, &entry)
-          .output()
-          .expect("failed to execute process");
-        io::stdout()
-          .write(&output.stdout)
-          .expect("failed to write to stdout");
-        io::stderr()
-          .write(&output.stderr)
-          .expect("failed to write to stderr");
+      for entry in statuses.iter() {
+        if regex.is_match(entry.path().unwrap()) {
+          let output = create_command(&command, &entry)
+            .output()
+            .expect("failed to execute process");
+          io::stdout()
+            .write(&output.stdout)
+            .expect("failed to write to stdout");
+          io::stderr()
+            .write(&output.stderr)
+            .expect("failed to write to stderr");
+        }
       }
     }
   }

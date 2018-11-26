@@ -1,6 +1,9 @@
 extern crate git2;
 extern crate regex;
-extern crate yaml_rust;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
+extern crate serde_yaml;
 #[macro_use]
 extern crate clap;
 use clap::App;
