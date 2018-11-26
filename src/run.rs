@@ -83,13 +83,12 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   if let Some(hook_commands) = hook_config.get(hook_type) {
     for command in hook_commands {
       let regex = Regex::new(&command.regex).unwrap();
-
       for entry in statuses.iter() {
         let file_path = entry.path().unwrap();
         if regex.is_match(file_path) {
           let output = create_command(&command, &entry)
             .output()
-            .expect("failed to execute process");
+            .unwrap_or_else(|_| panic!("failed to execute process hook {}", command.command));
 
           io::stdout()
             .write_all(&output.stdout)
@@ -103,9 +102,9 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
           }
 
           if command.restage {
-            repo_index
-              .add_path(Path::new(file_path))
-              .unwrap_or_else(|_| panic!("failed to restage file {}", file_path));
+            if let Err(e) = repo_index.add_path(Path::new(file_path)) {
+              panic!("{:?}", e);
+            }
           }
         }
       }

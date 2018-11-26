@@ -1,4 +1,10 @@
 pre-commit:
+    - command: prettier
+      arguments:
+        - --write
+        - <filename>
+      regex: '.*(js|jsx|scss|md)$'
+      restage: true
     - command: eslint
       arguments:
         - <filename>
@@ -11,11 +17,6 @@ pre-commit:
       arguments:
         - clippy
       regex: '.*(rs)$'
-    - command: prettier
-      arguments:
-        - --write
-        - <filename>
-      regex: '.*(js|jsx|scss|md)$'
     - command: cat
       arguments:
         - <filename>
