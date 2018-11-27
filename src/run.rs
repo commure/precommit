@@ -49,7 +49,13 @@ fn load_hooks(matches: &ArgMatches) -> Hooks {
     .read_to_string(&mut hooks_file)
     .expect("could not create string");
 
-  serde_yaml::from_str(&hooks_file).unwrap()
+  serde_yaml::from_str(&hooks_file).unwrap_or_else(|_| {
+    panic!(
+      "{}: {}",
+      "failed to deserialize hooks yaml file".red(),
+      hooks_file_path
+    )
+  })
 }
 
 fn get_staged_files(repo: &Repository) -> Statuses {

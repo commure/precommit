@@ -34,3 +34,4 @@ pre-commit:
       - command: cat
         arguments: [<filename>]
     regex: '.*(yaml|yml)$'
+
