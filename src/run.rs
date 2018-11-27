@@ -1,17 +1,23 @@
 use clap::ArgMatches;
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 use regex::Regex;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, Write};
 use std::path::Path;
 use std::process::Command;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 struct HookCommand {
   command: String,
   #[serde(default)]
   arguments: Vec<String>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+struct Hook {
+  commands: Vec<HookCommand>,
   regex: String,
   #[serde(default)]
   restage: bool,
@@ -19,14 +25,14 @@ struct HookCommand {
   description: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 struct Hooks {
   #[serde(rename = "pre-commit")]
-  pre_commit: Option<Vec<HookCommand>>,
+  pre_commit: Option<HashMap<String, Hook>>,
 }
 
 impl Hooks {
-  fn get(&self, hook_type: &str) -> Option<Vec<HookCommand>> {
+  fn get(&self, hook_type: &str) -> Option<HashMap<String, Hook>> {
     match hook_type {
       "pre-commit" => self.pre_commit.clone(),
       _ => {
@@ -80,30 +86,33 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let statuses = get_staged_files(&repo);
   let mut err = false;
 
-  if let Some(hook_commands) = hook_config.get(hook_type) {
-    for command in hook_commands {
-      let regex = Regex::new(&command.regex).unwrap();
+  if let Some(hooks) = hook_config.get(hook_type) {
+    for key in hooks.keys() {
+      let hook = hooks.get(key).unwrap();
+      let regex = Regex::new(&hook.regex).unwrap();
       for entry in statuses.iter() {
         let file_path = entry.path().unwrap();
         if regex.is_match(file_path) {
-          let output = create_command(&command, &entry)
-            .output()
-            .unwrap_or_else(|_| panic!("failed to execute process hook {}", command.command));
+          for command in &hook.commands {
+            let output = create_command(&command, &entry)
+              .output()
+              .unwrap_or_else(|_| panic!("failed to execute process hook {}", command.command));
 
-          io::stdout()
-            .write_all(&output.stdout)
-            .expect("failed to write to stdout");
-          io::stderr()
-            .write_all(&output.stderr)
-            .expect("failed to write to stderr");
+            io::stdout()
+              .write_all(&output.stdout)
+              .expect("failed to write to stdout");
+            io::stderr()
+              .write_all(&output.stderr)
+              .expect("failed to write to stderr");
 
-          if !output.status.success() {
-            err = true;
-          }
+            if !output.status.success() {
+              err = true;
+            }
 
-          if command.restage {
-            if let Err(e) = repo_index.add_path(Path::new(file_path)) {
-              panic!("{:?}", e);
+            if hook.restage {
+              if let Err(e) = repo_index.add_path(Path::new(file_path)) {
+                panic!("{:?}", e);
+              }
             }
           }
         }

@@ -1,23 +1,33 @@
 pre-commit:
-    - command: prettier
-      arguments:
-        - --write
-        - <filename>
-      regex: '.*(js|jsx|scss|md)$'
-      restage: true
-    - command: eslint
-      arguments:
-        - <filename>
-      regex: '.*(js|sass|css)$'
-    - command: rustfmt
-      arguments:
-        - <filename>
-      regex: '.*(rs)$'
-    - command: cargo
-      arguments:
-        - clippy
-      regex: '.*(rs)$'
-    - command: cat
-      arguments:
-        - <filename>
-      regex: '.*(yaml|yml)$'
+  prettier: 
+    commands:
+      - command: prettier
+        arguments: [--write, <filename>]
+    regex: '.*(js|jsx|scss|md)$'
+    restage: true
+
+  eslint: 
+    commands:
+      - command: eslint
+        arguments: [<filename>]
+    regex: '.*(js|sass|css)$'
+    restage: true
+
+  rustfmt: 
+    commands:
+      - command: rustfmt
+        arguments: [<filename>]
+    regex: '.*(rs)$'
+    restage: true
+
+  clippy: 
+    commands:
+      - command: cargo
+        arguments: [clippy]
+    regex: '.*(rs)$'
+
+  print_yaml:
+    commands:
+      - command: cat
+        arguments: [<filename>]
+    regex: '.*(yaml|yml)$'
