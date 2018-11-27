@@ -11,7 +11,11 @@ pub fn script_gen(location_command: &str, hook: &str, hook_config_file: &str) ->
 #!/bin/sh
 # {}
 # Hook created by precommit
-{} run {} {}
+if  git rev-parse -q --verify MERGE_HEAD; then
+  echo \"precommit does not run hooks on merge commits\"
+else 
+  {} run {} {}
+fi
 ",
     hook, location_command, hook, hook_config_file
   )
