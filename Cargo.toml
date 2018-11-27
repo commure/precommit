@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["rparki <chesslunatic@gmail.com>"]
 
 [dependencies]
+colored = "1.6"
 clap = { version = "~2.29.0", features = ["yaml"]}
 git2 = "0.7"
 regex = "1"

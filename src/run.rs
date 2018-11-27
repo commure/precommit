@@ -1,4 +1,5 @@
 use clap::ArgMatches;
+use colored::*;
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 use regex::Regex;
 use std::collections::HashMap;
@@ -74,6 +75,14 @@ fn create_command(h_command: &HookCommand, entry: &StatusEntry) -> Command {
   command
 }
 
+fn print_hook_output(hook_name: &str, hook_failed: bool) {
+  if !hook_failed {
+    println!("{} {} :  {}", "✓".green(), hook_name, "passed".green());
+  } else {
+    println!("{} {} : {}", "✗".red(), hook_name, "failed".red());
+  }
+}
+
 pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let hook_type = matches.values_of("hook_type").unwrap().next().unwrap();
   let hook_config = load_hooks(matches);
@@ -83,9 +92,10 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let mut err = false;
 
   if let Some(hooks) = hook_config.get(hook_type) {
-    for key in hooks.keys() {
-      let hook = &hooks[key];
+    for hook_name in hooks.keys() {
+      let hook = &hooks[hook_name];
       let regex = Regex::new(&hook.regex).unwrap();
+      let mut hook_failed = false;
       for entry in statuses.iter() {
         let file_path = entry.path().unwrap();
         if regex.is_match(file_path) {
@@ -101,12 +111,13 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
               .write_all(&output.stderr)
               .expect("failed to write to stderr");
 
-            if !output.status.success() {
-              err = true;
-            }
+            hook_failed = hook_failed || !output.status.success();
           }
         }
       }
+
+      print_hook_output(hook_name, hook_failed);
+      err = err || hook_failed;
     }
   }
 

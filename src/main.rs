@@ -1,3 +1,4 @@
+extern crate colored;
 extern crate git2;
 extern crate regex;
 #[macro_use]
