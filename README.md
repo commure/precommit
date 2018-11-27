@@ -1,8 +1,13 @@
 # GHooks
 
-## Setup
-Run `cargo run compile <hooks_file>` example hooks_file would be hooks.yaml 
-This will setup the git hook which is currently only a pre-commit. 
+## Installation
+To install binary : 
+
+`cargo install --git=http://github.com/commure/ghooks.git`
+
+Then in repository
+
+`precommit compile <hook_yaml_file>`
 
 ## Information
 Currenlty this only runs git pre-commit hook.
