@@ -5,7 +5,6 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, Write};
-use std::path::Path;
 use std::process::Command;
 
 #[derive(Deserialize, Debug, Clone)]
@@ -80,7 +79,6 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let hook_config = load_hooks(matches);
 
   let repo = Repository::init("./").expect("failed to find git repo");
-  let mut repo_index = repo.index().expect("failed to get repo index");
   let statuses = get_staged_files(&repo);
   let mut err = false;
 
