@@ -88,7 +88,7 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
 
   if let Some(hooks) = hook_config.get(hook_type) {
     for key in hooks.keys() {
-      let hook = hooks.get(key).unwrap();
+      let hook = &hooks[key];
       let regex = Regex::new(&hook.regex).unwrap();
       for entry in statuses.iter() {
         let file_path = entry.path().unwrap();
