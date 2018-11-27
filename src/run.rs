@@ -20,8 +20,6 @@ struct Hook {
   commands: Vec<HookCommand>,
   regex: String,
   #[serde(default)]
-  restage: bool,
-  #[serde(default)]
   description: Option<String>,
 }
 
@@ -107,12 +105,6 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
 
             if !output.status.success() {
               err = true;
-            }
-
-            if hook.restage {
-              if let Err(e) = repo_index.add_path(Path::new(file_path)) {
-                panic!("{:?}", e);
-              }
             }
           }
         }

@@ -3,22 +3,25 @@ pre-commit:
     commands:
       - command: prettier
         arguments: [--write, <filename>]
+      - command: git
+        arguments: [add, <filename>]
     regex: '.*(js|jsx|scss|md)$'
-    restage: true
 
   eslint: 
     commands:
       - command: eslint
         arguments: [<filename>]
+      - command: git
+        arguments: [add, <filename>]
     regex: '.*(js|sass|css)$'
-    restage: true
 
   rustfmt: 
     commands:
       - command: rustfmt
         arguments: [<filename>]
+      - command: git
+        arguments: [add, <filename>]
     regex: '.*(rs)$'
-    restage: true
 
   clippy: 
     commands:
