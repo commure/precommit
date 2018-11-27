@@ -102,9 +102,11 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
       let hook = &hooks[hook_name];
       let regex = Regex::new(&hook.regex).unwrap();
       let mut hook_failed = false;
+      let mut hook_ran = false;
       for entry in statuses.iter() {
         let file_path = entry.path().unwrap();
         if regex.is_match(file_path) {
+          hook_ran = true;
           for command in &hook.commands {
             let output = create_command(&command, &entry)
               .output()
@@ -128,7 +130,9 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
         }
       }
 
-      print_hook_output(hook_name, hook_failed);
+      if hook_ran {
+        print_hook_output(hook_name, hook_failed);
+      }
       err = err || hook_failed;
     }
   }
