@@ -102,7 +102,13 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
           for command in &hook.commands {
             let output = create_command(&command, &entry)
               .output()
-              .unwrap_or_else(|_| panic!("failed to execute process hook {}", command.command));
+              .unwrap_or_else(|_| {
+                panic!(
+                  "{}: {}",
+                  "failed to execute process for hook".red(),
+                  command.command
+                )
+              });
 
             io::stdout()
               .write_all(&output.stdout)
