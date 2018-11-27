@@ -1,4 +1,4 @@
-# HOOK_EXP
+# GHooks
 
 ## Setup
 Run `cargo run compile <hooks_file>` example hooks_file would be hooks.yaml 
