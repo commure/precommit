@@ -4,7 +4,7 @@
 
 To install binary :
 
-`cargo install --git=http://github.com/commure/ghooks.git`
+`cargo install --git=http://github.com/commure/precommit.git`
 
 Then in repository
 
