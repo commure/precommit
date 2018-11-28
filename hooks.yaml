@@ -23,12 +23,6 @@ pre-commit:
         arguments: [add, <filename>]
     regex: '.*(rs)$'
 
-  clippy: 
-    commands:
-      - command: cargo
-        arguments: [clippy]
-    regex: '.*(rs)$'
-
   print_yaml:
     commands:
       - command: cat

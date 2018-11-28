@@ -99,6 +99,16 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let hook_config = load_hooks(matches);
 
   let repo = Repository::init("./").expect("failed to find git repo");
+
+  // SKIP Merge Commits.
+  if let Ok(_v) = repo.revparse("MERGE_HEAD") {
+    println!(
+      "{}",
+      "Skipping precommit because this is a merge commit".blue()
+    );
+    return Ok(());
+  }
+
   let statuses = get_staged_files(&repo);
   let mut err = false;
 
@@ -108,7 +118,10 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
       let regex = Regex::new(&hook.regex).unwrap();
       let mut hook_failed = false;
       let mut hook_ran = false;
-      for entry in statuses.iter() {
+      for entry in statuses
+        .iter()
+        .filter(|e| !(e.status().is_wt_deleted() || e.status().is_index_deleted()))
+      {
         let file_path = entry.path().unwrap();
         if regex.is_match(file_path) {
           hook_ran = true;
