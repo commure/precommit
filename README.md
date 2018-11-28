@@ -1,4 +1,4 @@
-# GHooks
+# precommit
 
 ## Installation
 
