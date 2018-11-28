@@ -8,7 +8,7 @@ To install binary :
 
 Then in repository
 
-`precommit compile <hook_yaml_file>`
+`precommit install <hook_yaml_file>`
 
 ## Information
 

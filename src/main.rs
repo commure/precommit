@@ -16,7 +16,7 @@ fn run() -> Result<(), ()> {
   let cli_config = load_yaml!("cli.yml");
   let matches = App::from_yaml(cli_config).get_matches();
   match matches.subcommand() {
-    ("compile", Some(matches)) => compile::execute(matches),
+    ("install", Some(matches)) => compile::execute(matches),
     ("run", Some(matches)) => run::execute(matches),
     _ => unreachable!(),
   }
