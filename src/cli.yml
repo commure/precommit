@@ -4,7 +4,7 @@ author: Ralph P. <chesslunatic@gmail.com>
 about: Precommit hooks.
 subcommands:
     - install:
-        about: compiles precommits and alters .git/hooks
+        about: installs precommit git hooks (note this will override your .git/hooks files).
         version: "0.1.0"
         args:
             - hook_config_file:
