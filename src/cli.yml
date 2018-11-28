@@ -8,15 +8,30 @@ subcommands:
         version: "0.1.0"
         args:
             - hook_config_file:
+                help: "Hook yaml file to pull from."
                 required: true
                 index: 1
+            - skip:
+                help: "Hooks to skip"
+                short: "s"
+                long: "skip"
+                use_delimiter: true
+                multiple: true
     - run:
-        about: compiles precommits and alters .git/hooks
+        about: runs precommit with given hook type and hook file.
         version: "0.1.0"
         args:
             - hook_type:
+                help: "The git hook type currenlty running"
                 required: true
                 index: 1
             - hooks:
+                help: "Hook yaml file to pull from."
                 required: true
                 index: 2
+            - skip:
+                help: "Hooks to skip"
+                short: "s"
+                long: "skip"
+                use_delimiter: true
+                multiple: true

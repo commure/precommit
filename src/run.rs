@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use colored::*;
 use git2::{Repository, StatusEntry, StatusOptions, Statuses};
 use regex::Regex;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{self, Write};
@@ -90,6 +90,11 @@ fn print_hook_output(hook_name: &str, hook_failed: bool) {
 }
 
 pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
+  let skip_hooks: HashSet<_> = matches
+    .values_of("skip")
+    .map(|v| v.collect())
+    .unwrap_or_else(HashSet::new);
+
   let hook_type = matches.values_of("hook_type").unwrap().next().unwrap();
   let hook_config = load_hooks(matches);
 
@@ -98,7 +103,7 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
   let mut err = false;
 
   if let Some(hooks) = hook_config.get(hook_type) {
-    for hook_name in hooks.keys() {
+    for hook_name in hooks.keys().filter(|h| skip_hooks.get::<str>(h).is_none()) {
       let hook = &hooks[hook_name];
       let regex = Regex::new(&hook.regex).unwrap();
       let mut hook_failed = false;
