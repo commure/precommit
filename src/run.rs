@@ -118,7 +118,10 @@ pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
       let regex = Regex::new(&hook.regex).unwrap();
       let mut hook_failed = false;
       let mut hook_ran = false;
-      for entry in statuses.iter() {
+      for entry in statuses
+        .iter()
+        .filter(|e| !(e.status().is_wt_deleted() || e.status().is_index_deleted()))
+      {
         let file_path = entry.path().unwrap();
         if regex.is_match(file_path) {
           hook_ran = true;
