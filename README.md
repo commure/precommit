@@ -12,7 +12,7 @@ Then in repository
 
 ## Information
 
-Currenlty this only runs git pre-commit hook.
+Runs hooks specified in yaml based on regex test during git pre-commit for staged files.
 
 ## Config file
 
