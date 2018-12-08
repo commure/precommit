@@ -1,4 +1,5 @@
 use clap::ArgMatches;
+use failure::Error;
 use git2::Repository;
 use std::env::current_exe;
 use std::fs::{set_permissions, File, Permissions};
@@ -22,7 +23,7 @@ pub fn script_gen(
   )
 }
 
-pub fn execute(matches: &ArgMatches) -> Result<(), ()> {
+pub fn execute(matches: &ArgMatches) -> Result<(), Error> {
   // let location = "./target/debug/precommit";
   let skip_hooks: Vec<_> = matches
     .values_of("skip")
