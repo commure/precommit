@@ -21,6 +21,8 @@ struct CommandError(String, IOError);
 #[fail(display = "Invalid hook yaml file '{}'", _0)]
 struct YamlSerializeError(String);
 
+const FILE_ARG: &str = "<filename>";
+
 #[derive(Deserialize, Debug, Clone)]
 struct HookCommand {
   command: String,
@@ -32,6 +34,8 @@ struct HookCommand {
 struct Hook {
   commands: Vec<HookCommand>,
   regex: String,
+  #[serde(default)]
+  run_once: bool,
   #[serde(default)]
   description: Option<String>,
 }
@@ -77,7 +81,7 @@ fn get_staged_files(repo: &Repository) -> Result<Statuses, Error> {
 fn create_command(h_command: &HookCommand, entry: &StatusEntry) -> Command {
   let mut command = Command::new(&h_command.command);
   for arg in &h_command.arguments {
-    if arg == "<filename>" {
+    if arg == FILE_ARG {
       command.arg(entry.path().unwrap());
     } else {
       command.arg(arg);
@@ -128,6 +132,10 @@ pub fn execute(matches: &ArgMatches) -> Result<(), Error> {
         .iter()
         .filter(|e| !(e.status().is_wt_deleted() || e.status().is_index_deleted()))
       {
+        if hook.run_once & hook_ran {
+          break;
+        }
+
         let file_path = entry.path().unwrap();
         if regex.is_match(file_path) {
           hook_ran = true;
