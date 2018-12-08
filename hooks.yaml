@@ -7,6 +7,13 @@ pre-commit:
         arguments: [add, <filename>]
     regex: '.*(js|jsx|scss|md)$'
 
+  clippy: 
+    commands:
+      - command: cargo
+        arguments: [clippy]
+    regex: '.*rs$'
+    run_once: true
+    
   eslint: 
     commands:
       - command: eslint
